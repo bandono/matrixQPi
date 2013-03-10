@@ -20,10 +20,10 @@ print RESULT
 
 wiringpi.pinMode(1,INPUT)
 wiringpi.pinMode(7,OUTPUT)
-wiringpi.digitalWrite(7,LOW)
+wiringpi.digitalWrite(7,HIGH)
 
 RESULT=wiringpi.digitalRead(1)
-while RESULT==1:
+while RESULT==0:
         RESULT=wiringpi.digitalRead(1)
         time.sleep(1)
 print RESULT
