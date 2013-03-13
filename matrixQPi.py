@@ -37,19 +37,40 @@ try:
 	for j in range(len(col)):
 		wiringpi.pinMode(col[j],OUTPUT)
 		wiringpi.digitalWrite(col[j],LOW)
+except (KeyboardInterrupt, SystemExit):
+	reinit()
+	raise
+except:
+	reinit()
+	sys.exit("exiting")
 
+try:
 	# (2) set all rows as input
 	for i in range(len(row)):
 		wiringpi.pinMode(row[i],INPUT)
+except (KeyboardInterrupt, SystemExit):
+	reinit()
+	raise
+except:
+	reinit()
+	sys.exit("exiting")
 
+try:
 	# (3) scan rows for pushed key/button
 	rowHi=1
 	while rowHi==1:
-		for i in range(len(row)):
-			tmpRead=wiringpi.digitalRead(row[i])
-			if tmpRead==0:
-				rowHi=0
-				rowVal=i
+		try:
+			for i in range(len(row)):
+				tmpRead=wiringpi.digitalRead(row[i])
+				if tmpRead==0:
+					rowHi=0
+					rowVal=i
+		except (KeyboardInterrupt, SystemExit):
+			reinit()
+			raise
+		except:
+			reinit()
+			sys.exit("exiting")
 except (KeyboardInterrupt, SystemExit):
 	reinit()
 	raise
