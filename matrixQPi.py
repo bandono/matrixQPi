@@ -1,13 +1,32 @@
 #!/usr/bin/python
 # version 1.0
 # read 3x4 membrane keypad and print pressed key to stdout
+# command line argument:
+# -i : light a LED for 1 seconds indicating successful pressed key reading
 
 import wiringpi
 import time
+import sys
 INPUT=0
 OUTPUT=1
 HIGH=1
 LOW=0
+
+#mapping of used GPIO for LED indicator
+led=1
+
+# getting command line argument if any
+try:
+	myArg=sys.argv[1]
+except:
+	# if no argument, assign 0 to myArg
+	myArg=0
+
+def turnOnLED():
+	wiringpi.pinMode(led,OUTPUT)
+	wiringpi.digitalWrite(led,LOW)
+	time.sleep(1)
+	wiringpi.pinMode(led,INPUT)
 
 # mapping of symbols from the keypad button 
 # keypad used below is like phone dial key (10 digits and "*", "#" signs)
@@ -70,3 +89,8 @@ for i in range(len(row)):
 for j in range(len(col)):
         wiringpi.pinMode(col[j],INPUT)
 
+if myArg=="-i":
+	turnOnLED()
+	sys.exit()
+else:
+	sys.exit()
