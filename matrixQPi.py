@@ -21,34 +21,40 @@ class matrixQConst:
 		]
 	
 class matrixQPi(object):
-	"""Simple matrix key row-column GPIO reader"""
+	"""Simple matrix key row-column GPIO reader
+	   Attributes: 
+	"""
 	# mapping of symbols from the keypad button
 	# default optional keypad with phone dial keys (10 digits and "*", "#" signs)
 	default =  matrixQConst()
 
 	def __init__(self, numberOfRow=4, numberOfCol=3, keyPad=default.defaultKeyPad, row=default.row, col=default.col):
+		# wiringPi instance creation
+		# (print SETUP for debugging, success value is SETUP=1) 
 		self.SETUP=wiringpi.wiringPiSetup()
-
-		# (1) set all columns as output low
-		for j in range(len(col)):
-			wiringpi.pinMode(col[j],OUTPUT)
-			wiringpi.digitalWrite(col[j],LOW)
-
-		# (2) set all rows as input
-		for i in range(len(row)):
-			wiringpi.pinMode(row[i],INPUT)
 		
+		# in class 'global' constants
 		self.keyPad = keyPad
 		self.row = row
 		self.col = col
 
-	def turnOnLED(self):
+	def turnOnLED(self,onDuration):
 		wiringpi.pinMode(led,OUTPUT)
 		wiringpi.digitalWrite(led,LOW)
-		time.sleep(1)
+		time.sleep(onDuration)
 		wiringpi.pinMode(led,INPUT)
-        
-	def reInit(self):
+		
+	def __preRead(self):
+		# (1) set all columns as output low
+		for j in range(len(self.col)):
+			wiringpi.pinMode(self.col[j],OUTPUT)
+			wiringpi.digitalWrite(self.col[j],LOW)
+
+		# (2) set all rows as input
+		for i in range(len(self.row)):
+			wiringpi.pinMode(self.row[i],INPUT)
+			       
+	def __postRead(self):
 		# reinitialize all rows and columns as input before exiting
 		for i in range(len(self.row)):
 			wiringpi.pinMode(self.row[i],INPUT)
@@ -56,6 +62,9 @@ class matrixQPi(object):
 			wiringpi.pinMode(self.col[j],INPUT)
 
 	def scanQ(self):
+		# steps (1) and (2) before reading GPIOs
+		self.__preRead()
+		
 		# (3) scan rows for pushed key/button
 		rowHi=1
 		while rowHi==1:
@@ -82,9 +91,8 @@ class matrixQPi(object):
 							colLo=1
 							colVal=j
 
-		# (7) print the symbol of pressed key, note that it prints newline
+		# reinitialize used GPIOs
+		self.__postRead()
+
+		# (7) return the symbol of pressed key from keyPad mapping
 		return self.keyPad[rowVal][colVal]
-		
-		reInit()
-		#if myArg=="-i":
-        #turnOnLED()
