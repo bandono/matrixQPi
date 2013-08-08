@@ -1,5 +1,5 @@
 import wiringpi
-import time
+import time	# ON duration for LED indicator s
 
 INPUT=0
 OUTPUT=1
@@ -7,11 +7,14 @@ HIGH=1
 LOW=0
 
 class matrixQConst:
+	"""Default keypad symbol mapping and assigned GPIO used
+	   when nothing is set during matrixQPi instantiation  
+	"""
 	def __init__(self):
 		# mapping of used GPIO pin in wiringPi numbering to rows and columns
 		self.row=[7,0,2,3]
 		self.col=[4,5,6]
-		#mapping of used GPIO for LED indicator
+		# mapping of used GPIO for LED indicator
 		self.led=1
 		self.defaultKeyPad=[
 			[1,2,3],
@@ -22,16 +25,27 @@ class matrixQConst:
 	
 class matrixQPi(object):
 	"""Simple matrix key row-column GPIO reader
-	   Attributes: 
+	   Attributes:
+	   1. SETUP (wiringPi instantiation status)
+	   2. keyPad (symbol mapping of m x n matrix in tupple set)
+	   3. row (GPIO pins assigned as row)
+	   4. col (GPIO pins assigned as column)
+	   5. TBD [LED related]
+	   Exception will be raised if mismatch found between
+	   keyPad m x n size vs GPIO pins assigned
 	"""
 	# mapping of symbols from the keypad button
 	# default optional keypad with phone dial keys (10 digits and "*", "#" signs)
 	default =  matrixQConst()
 
-	def __init__(self, numberOfRow=4, numberOfCol=3, keyPad=default.defaultKeyPad, row=default.row, col=default.col):
+	def __init__(self, keyPad=default.defaultKeyPad, row=default.row, col=default.col):
 		# wiringPi instance creation
 		# (print SETUP for debugging, success value is SETUP=1) 
 		self.SETUP=wiringpi.wiringPiSetup()
+		
+		# keypad dimension vs assigned GPIO checking
+		# (must be of the same m x n size)
+		self.__matrixSanity(keyPad, row, col)
 		
 		# in class 'global' constants
 		self.keyPad = keyPad
@@ -43,6 +57,20 @@ class matrixQPi(object):
 		wiringpi.digitalWrite(led,LOW)
 		time.sleep(onDuration)
 		wiringpi.pinMode(led,INPUT)
+
+	def __matrixSanity(self, keyPad, row, col):
+		keyPadRowSize=len(keyPad)
+		gpioRowSize=len(row)
+		gpioColSize=len(col)
+		
+		# check #1, number of keypad row vs number of GPIO use as row 
+		if keyPadRowSize != gpioRowSize:
+			raise ValueError, 'Mismatch found: number of keypad row to number ofGPIOs acting as row' 	 
+		else:
+			# check #2, each number of column of the keypad row vs number of GPIO use as column
+			for m in range(gpioRowSize):
+				if len(keyPad[m]) != gpioColSize:
+					raise ValueError, 'Mismatch found: number of keypad column to number of GPIOs acting as column' 
 		
 	def __preRead(self):
 		# (1) set all columns as output low
