@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# example.py
+# example_2x3.py
 # an example on how to use the matrixQPi class
 # to read input from matrix keypad
 # and print the returned button symbol
@@ -24,6 +24,10 @@ keyPad=[[7, 8, 9],
         ['*', 0, '#']
 ]
 
+# GPIO addresses used in my version of 4 x 3 circuitry are
+# row=[7,0,2,3]
+# col=[4,5,6]
+#
 # used GPIO address, logically grouped as row and column
 # for the above buttons (2 x 3 matrix)
 row=[2, 3]
